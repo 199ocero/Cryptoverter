@@ -53,7 +53,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 50),
+      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 70),
       child: Column(
         children: <Widget> [
           DropdownButtonHideUnderline(
@@ -115,7 +115,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           Container(
             child: ListTile(
               title: Chip(label: Container(
-                
                 width: 300,
                 height: 50,
                 child: Align(
@@ -132,7 +131,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.normal, color: Colors.grey,fontSize: 10,)
             ),
-          ),
+          ),  
         ],
       ),
     );
