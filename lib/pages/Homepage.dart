@@ -82,7 +82,7 @@ class _HompageState extends State<Hompage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(coin.symbol,style: TextStyle(color: Colors.grey),),
-                        Text('\$'+ price,style: TextStyle(color: Colors.grey),),
+                        Text(price,style: TextStyle(color: Colors.grey),),
                         Text('24 Hours: '+percentage_24.toStringAsFixed(2)+'%',style: TextStyle(color: Colors.redAccent),),
 
                       ],
@@ -116,7 +116,7 @@ class _HompageState extends State<Hompage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(coin.symbol,style: TextStyle(color: Colors.grey),),
-                        Text('\$'+ price,style: TextStyle(color: Colors.grey),),
+                        Text(price,style: TextStyle(color: Colors.grey),),
                         Text('24 Hours: '+percentage_24.toStringAsFixed(2)+'%',style: TextStyle(color: Colors.green),)
                       ],
                     ),
