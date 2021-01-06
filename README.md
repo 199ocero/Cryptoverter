@@ -4,5 +4,4 @@ It is an application that shows different cryptocurrency with its default prices
 
 ## Package Use
 
-- [http 0.12.2](https://pub.dev/packages/http)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+- [http 0.12.2](https://pub.dev/packages/http) - A composable, Future-based library for making HTTP requests.
