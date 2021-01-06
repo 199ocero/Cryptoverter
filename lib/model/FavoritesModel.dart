@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart';
 
 class FavoritesModel extends ChangeNotifier {
   
@@ -19,30 +16,41 @@ class FavoritesModel extends ChangeNotifier {
   }
 }
 
-class Storage {
-    Future<String> get _localPath async {
-      final directory = await getApplicationDocumentsDirectory();
+class CryptoFavorites{
+   String symbol;
 
-      return directory.path;
-    }
-    Future<File> get _localFile async {
-      final path = await _localPath;
-      return File('$path/favorites.txt');
-    }
+   CryptoFavorites({this.symbol});
 
-    Future<String> readData() async{
-      try{
-        final file = await _localFile;
-        String contents = await file.readAsString();
-        return contents;
-      }
-      catch(e){
-        return e.toString();
-      }
-    }
-
-    Future<File> writeData(String data) async{
-      final file = await  _localFile;
-      return file.writeAsString("$data");
-    }
+  toJSONEncodable() {
+    Map<String, dynamic> m = new Map();
+    m['symbol'] = symbol;
+    return m;
+  }
 }
+
+class CryptoFavoritesList{
+
+  List<CryptoFavorites> items;
+
+  CryptoFavoritesList() {
+    items = new List();
+  }
+
+  toJSONEncodable() {
+    return items.map((item) {
+      return item.toJSONEncodable();
+    }).toList();
+  }
+
+  toList(List data){
+    items= List<CryptoFavorites>.from(
+      // ignore: unnecessary_cast
+      (data as List).map(
+        (item) => CryptoFavorites(
+          symbol: item['symbol']
+        ),
+      ),
+    );
+  }
+}
+

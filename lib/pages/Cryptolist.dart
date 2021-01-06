@@ -4,6 +4,8 @@ import 'package:Cryptoverter/model/FavoritesModel.dart';
 import 'package:Cryptoverter/pages/Homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:intl/intl.dart';
 
 class Cryptolist extends StatefulWidget {
   @override
@@ -13,9 +15,13 @@ class Cryptolist extends StatefulWidget {
 class _CryptolistState extends State<Cryptolist> {
   List<Coins> _coins = [];
   bool _loading;
+  final LocalStorage _favorites = new LocalStorage('favorites');
+  final CryptoFavoritesList _favoritesList = CryptoFavoritesList();
+  
   @override
   void initState() {
     super.initState();
+    _loadData();
     _loading = true;
     Services.getCoins().then((coins) {
       setState(() {
@@ -23,14 +29,27 @@ class _CryptolistState extends State<Cryptolist> {
         _loading = false;
       });
     });
+
     
   }
+
+  _loadData() async{
+    await _favorites.ready;
+    // _favorites.clear();
+    if(_favorites.getItem('favorites')==null){
+      _favorites.setItem('favorites', _favoritesList.toJSONEncodable());
+    }else{
+      _favoritesList.toList(_favorites.getItem('favorites'));
+    }
+  }
+
+  
   @override
   Widget build(BuildContext context) {
-    
+    const PrimaryColor = const Color(0xff212244);
     return Scaffold(
       drawer: DrawerCodeOnly(),
-      backgroundColor: Colors.white,
+      backgroundColor: PrimaryColor,
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
@@ -38,8 +57,12 @@ class _CryptolistState extends State<Cryptolist> {
       ),
       body: Consumer<FavoritesModel>(
         builder: (context,favorites,child){
+          favorites.favorites.clear();
+          for (var i = 0; i < _favoritesList.items.length; i++) {
+            favorites.favorites.add(_favorites.getItem('favorites')[i]['symbol']);
+          }
           return RefreshIndicator(
-          color: Colors.white,
+          color: PrimaryColor,
           onRefresh: () {
             Navigator.pushReplacement(context, PageRouteBuilder(pageBuilder: (a,b,c)=>Cryptolist()));
             return Future.value(false);
@@ -48,57 +71,74 @@ class _CryptolistState extends State<Cryptolist> {
             itemCount: _coins.length,
             itemBuilder: (context, index){
             Coins coin = _coins[index];
-            var price = double.parse(coin.priceUsd).toStringAsFixed(2);
+            
+            var price = NumberFormat.simpleCurrency().format(double.parse(coin.priceUsd));
             var percentage_24 = double.parse(coin.percentChange24H);
             if (percentage_24<0) {
                 return Card(
-                child: ListTile(
-                  title: Text(coin.name),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(coin.symbol),
-                      Text('\$'+ price),
-                      Text('24 Hours: '+percentage_24.toStringAsFixed(2)+'%',style: TextStyle(color: Colors.redAccent),),
+                child: Container(
+                  color: PrimaryColor,
+                  child: ListTile(
+                    title: Text(coin.name,style: TextStyle(color: Colors.grey),),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(coin.symbol,style: TextStyle(color: Colors.grey),),
+                        Text(price,style: TextStyle(color: Colors.grey),),
+                        Text('24 Hours: '+percentage_24.toStringAsFixed(2)+'%',style: TextStyle(color: Colors.redAccent),),
 
-                    ],
+                      ],
+                    ),
+                    trailing: (favorites.favorites.contains(coin.symbol)) ? IconButton(icon: Icon(Icons.favorite,color: Colors.redAccent)):
+                    IconButton(icon: Icon(Icons.favorite),),
+                    onTap: () async{
+                      await _favorites.ready;
+                      CryptoFavorites data = CryptoFavorites(symbol:coin.symbol);
+                      if(favorites.favorites.contains(coin.symbol)){
+                        _favoritesList.items.removeWhere((e)=> e.symbol == coin.symbol);
+                        _favorites.setItem('favorites', _favoritesList.toJSONEncodable());
+                        Navigator.pushReplacement(context, PageRouteBuilder(pageBuilder: (a,b,c)=>Cryptolist()));
+                        
+                      }else{
+                        Navigator.pushReplacement(context, PageRouteBuilder(pageBuilder: (a,b,c)=>Cryptolist()));
+                        _favoritesList.items.add(data);
+                        _favorites.setItem('favorites', _favoritesList.toJSONEncodable());
+                      }
+                    },
                   ),
-                  trailing: (favorites.favorites.contains(coin.name)) ? IconButton(icon: Icon(Icons.favorite,color: Colors.redAccent)):
-                  IconButton(icon: Icon(Icons.favorite),),
-                  onTap: (){
-                    if(favorites.favorites.contains(coin.name)){
-                      Navigator.pushReplacement(context, PageRouteBuilder(pageBuilder: (a,b,c)=>Cryptolist()));
-                      favorites.favorites.remove(coin.name);
-                    }else{
-                      Navigator.pushReplacement(context, PageRouteBuilder(pageBuilder: (a,b,c)=>Cryptolist()));
-                      favorites.favorites.add(coin.name);
-                    }
-                  },
                 ),
               );
             } else {
                 return Card(
-                child: ListTile(
-                  title: Text(coin.name),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(coin.symbol),
-                      Text('\$'+ price),
-                      Text('24 Hours: '+percentage_24.toStringAsFixed(2)+'%',style: TextStyle(color: Colors.green),),
-                    ],
+                child: Container(
+                  color: PrimaryColor,
+                  child: ListTile(
+                    title: Text(coin.name,style: TextStyle(color: Colors.grey),),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(coin.symbol,style: TextStyle(color: Colors.grey),),
+                        Text(price,style: TextStyle(color: Colors.grey),),
+                        Text('24 Hours: '+percentage_24.toStringAsFixed(2)+'%',style: TextStyle(color: Colors.green),),
+                      ],
+                    ),
+                    trailing: (favorites.favorites.contains(coin.symbol)) ? IconButton(icon: Icon(Icons.favorite,color: Colors.redAccent)):
+                    IconButton(icon: Icon(Icons.favorite),),
+                    onTap: () async{
+                      await _favorites.ready;
+                      CryptoFavorites data = CryptoFavorites(symbol:coin.symbol);
+                      if(favorites.favorites.contains(coin.symbol)){
+                        _favoritesList.items.removeWhere((e)=> e.symbol == coin.symbol);
+                        _favorites.setItem('favorites', _favoritesList.toJSONEncodable());
+                        Navigator.pushReplacement(context, PageRouteBuilder(pageBuilder: (a,b,c)=>Cryptolist()));
+                        
+                      }else{
+                        Navigator.pushReplacement(context, PageRouteBuilder(pageBuilder: (a,b,c)=>Cryptolist()));
+                        _favoritesList.items.add(data);
+                        _favorites.setItem('favorites', _favoritesList.toJSONEncodable());
+                      }
+                    },
                   ),
-                  trailing: (favorites.favorites.contains(coin.name)) ? IconButton(icon: Icon(Icons.favorite,color: Colors.redAccent)):
-                  IconButton(icon: Icon(Icons.favorite),),
-                  onTap: (){
-                    if(favorites.favorites.contains(coin.name)){
-                      Navigator.pushReplacement(context, PageRouteBuilder(pageBuilder: (a,b,c)=>Cryptolist()));
-                      favorites.favorites.remove(coin.name);
-                    }else{
-                      Navigator.pushReplacement(context, PageRouteBuilder(pageBuilder: (a,b,c)=>Cryptolist()));
-                      favorites.favorites.add(coin.name);
-                    }
-                  },
                 ),
               );
             }

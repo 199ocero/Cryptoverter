@@ -3,7 +3,7 @@ import 'package:Cryptoverter/api/Coins.dart';
 
 
 class Services{
-  static const String url = 'https://api.alternative.me/v1/ticker/?limit=20';
+  static const String url = 'https://api.alternative.me/v1/ticker/?limit=10';
 
   static Future<List<Coins>> getCoins() async{
     try{
